@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="/static/styles.css">
+  <title>Stocks</title>
+</head>
+<body>
+  <h1>在庫管理ページ</h1>
+  <h2>データ全消去ボタン</h2>
+  <form action="/clearData" method="post">
+    <button type="submit">全データ消去</button>
+  </form>
+  <h2>在庫更新・作成</h2>
+  <p>
+    <label>商品名：<input type="text" id="nameText" placeholder="商品名"></label>
+    <label>数量：<input type="number" id="quantityInput" placeholder="数量"></label>
+    <input type="button" value="追加" id="checkButton">
+  </p>
+  <p id="msg"></p>
+  <h2>在庫確認</h2>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      let nameText = document.getElementById('nameText');
+      let quantityInput = document.getElementById('quantityInput');
+      let msg = document.getElementById('msg');
+      let checkButton = document.getElementById('checkButton');
+
+      checkButton.addEventListener('click', function () {
+        let productName = nameText.value;
+        let quantity = quantityInput.value;
+        msg.innerText = `${productName} を ${quantity} 個追加`;
+      });
+    });
+  </script>
+</body>
+</html>

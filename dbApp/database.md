@@ -132,3 +132,13 @@ comments テーブルにデータが追加されているか確認しましょ�
 ```sql
 select * from comments;
 ```
+
+  <!-- <% if (stocks.length > 0) { %>
+    <ul>
+      <% stocks.forEach(stock => { %>
+        <li><%= stock.productname %> - Quantity: <%= stock.productquantity %></li>
+      <% }) %>
+    </ul>
+  <% } else { %>
+    <p>No stocks available.</p>
+  <% } %> -->
