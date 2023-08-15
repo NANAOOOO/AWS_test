@@ -120,7 +120,7 @@ app.post("/stocksUpdate/", (req, res, next) => {
             client
               .query(insertQuery)
               .then(() => {
-                res.render("stocks.ejs",{
+                res.send({
                 message:"データを消去できます",
                 responseName:updateName,
                 responseQuantity:updateQuantity,
