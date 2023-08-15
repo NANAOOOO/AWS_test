@@ -133,7 +133,7 @@ comments テーブルにデータが追加されているか確認しましょ�
 select * from comments;
 ```
 
-  <!-- <% if (stocks.length > 0) { %>
+  <% if (stocks.length > 0) { %>
     <ul>
       <% stocks.forEach(stock => { %>
         <li><%= stock.productname %> - Quantity: <%= stock.productquantity %></li>
@@ -141,4 +141,14 @@ select * from comments;
     </ul>
   <% } else { %>
     <p>No stocks available.</p>
-  <% } %> -->
+  <% } %> 
+   <% if (sales.length > 0) { %>
+    <ul>
+      <% sales.forEach(sale => { %>
+        <li><%= sale.productname %> - Quantity: <%= sale.quantity %> - Amount: <%= sale.amount %></li>
+      <% }) %>
+    </ul>
+    <p>Total Sales Amount: <%= totalSalesAmount %></p>
+  <% } else { %>
+    <p>No sales recorded.</p>
+  <% } %>
