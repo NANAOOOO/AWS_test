@@ -19,19 +19,30 @@ app.set("view engine", "ejs");
 // htmlやcssファイルが保存されている publicフォルダ を指定
 app.use("/static", express.static(path.join(__dirname, "public")));
 
-// 在庫DBに接続
+// DBに接続
 var pool = new pg.Pool({
   database: "postgres",
-  user: "apple", //ユーザー名はデフォルト以外を利用した人は適宜変更すること
-  password: "postgres", //PASSWORDにはPostgreSQLをインストールした際に設定したパスワードを記述。
+  user: "apple", 
+  password: "postgres", 
   host: "localhost",
   port: 5432
 });
 
+//stocksページの表示
+app.get("/stocks/", (req, res, next) => {
+  res.render("stocks.ejs", {
+    responseName: '商品名',
+    responseQuantity: 0,
+    checkName: "商品名",
+    checkQuantity: 0,
+    message:"データを消去できます",
+    checkAll:"商品名を入力しない場合、全てのデータを表示します"
+  });
+});
 
 //⑤在庫と売上のデータを全削除 
 app.post('/cleanData/', (req, res) => {
-  pool.query('DELETE FROM stock', function (error1, result1) {
+  pool.query('DELETE FROM stocks', function (error1, result1) {
     if (error1) {
       console.error(error1);
       res.status(500).json({ error: 'エラーが発生しました' });
@@ -43,27 +54,23 @@ app.post('/cleanData/', (req, res) => {
         res.status(500).json({ error: 'エラーが発生しました' });
         return;
       }
-      res.json({ message: '在庫と売上を削除しました' });
+      res.render("stocks.ejs",{
+        responseName: '商品名',
+        responseQuantity: 0,
+        checkName: "商品名",
+        checkQuantity: 0,
+        message:"データを全て削除しました",
+        checkAll:"商品名を入力しない場合、全てのデータを表示します"
+      });
     });
-  });
-});
-
-
-//stocksページの表示
-app.get("/stocks/", (req, res, next) => {
-  res.render("stocks.ejs", {
-    responseName: '商品名',
-    responseQuantity: 0,
-    checkName: "商品名",
-    checkQuantity: 0
   });
 });
 
 //①在庫の更新・作成
 app.post("/stocksUpdate/", (req, res, next) => {
   console.log(req.body);
-  const updateName = req.body.updateName;
-  const updateQuantity = Number(req.body.updateQuantity);
+  const updateName = req.body.name;
+  const updateQuantity = Number(req.body.amount);
   // ユーザーが入力した商品について既存の在庫を取得する
   const existingStockQuery = {
     text: "SELECT * FROM stocks WHERE productName = $1",
@@ -91,10 +98,18 @@ app.post("/stocksUpdate/", (req, res, next) => {
               values: [newQuantity, updateName ]
             };
             client
+            // ＜同商品の在庫がある場合＞
               .query(updateQuery)
               .then(() => {
-                const response = updateName + "を" + updateQuantity + "追加しました";
-                res.send(response);
+                res.render("stocks.ejs",{
+                  responseName:updateName,
+                  responseQuantity:updateQuantity,
+                  checkName: "商品名",
+                  checkQuantity: 0,
+                  message:"データを消去できます",
+                  checkAll:"商品名を入力しない場合、全てのデータを表示します"
+                }
+                ) 
               })
               .catch(e => {
                 console.error(e.stack);
@@ -105,11 +120,13 @@ app.post("/stocksUpdate/", (req, res, next) => {
             client
               .query(insertQuery)
               .then(() => {
-                res.render(stocks.js,{
+                res.render("stocks.ejs",{
+                message:"データを消去できます",
                 responseName:updateName,
                 responseQuantity:updateQuantity,
                 checkName: "商品名",
-                checkQuantity: 0
+                checkQuantity: 0,
+                checkAll:"商品名を入力しない場合、全てのデータを表示します"
               });
               })
               .catch(e => {
@@ -158,20 +175,33 @@ app.post("/checkStocks/", (req, res, next) => {
             if (results.rows.length > 0) {
               console.log(results.rows[0].productquantity)
               res.render("stocks.ejs",{ 
+                message:"データを消去できます",
                 responseName: '商品名',
                 responseQuantity: 0,
                 checkName:productName,
-                checkQuantity:results.rows[0].productquantity});
+                checkQuantity:results.rows[0].productquantity,
+                checkAll:"商品名を入力しない場合、全てのデータを表示します"});
             } else {
-              res.render("stocks.ejs",{checkName:productName});
+              res.render("stocks.ejs",{
+                message:"データを消去できます",
+                responseName: '商品名',
+                responseQuantity: 0,
+                checkQuantity: 0,
+                checkName:productName,
+                checkAll:"商品名を入力しない場合、全てのデータを表示します"
+              });
             }
           } 
           // 商品名が指定されなかった場合は全商品の在庫情報を返す
           else {
             console.log(results.rows)
-
-            res.render("stocks.ejs",{checkName:results.rows});
-
+            res.render("stocks.ejs",{
+              message:"データを消去できます",
+              responseName: '商品名',
+              responseQuantity: 0,
+              checkName: "商品名",
+              checkQuantity: 0,
+              checkAll:results.rows});
           }
          }
         }
@@ -195,9 +225,9 @@ app.get("/sales/", (req, res, next) => {
 
 // ③販売
 app.post("/sellProduct/", (req, res, next) => {
-  const productName = req.body.saleName;
-  const quantity = req.body.saleQuantity;
-  const price = req.body.salePrice; // 商品価格はユーザーの言い値と仮定する
+  const productName = req.body.name;
+  const quantity = req.body.amount;
+  const price = req.body.price; // 商品価格はユーザーの言い値と仮定する
   console.log(productName);
   console.log(quantity);
   console.log(price);

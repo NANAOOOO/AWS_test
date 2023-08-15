@@ -152,3 +152,5 @@ select * from comments;
   <% } else { %>
     <p>No sales recorded.</p>
   <% } %>
+
+    
